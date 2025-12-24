@@ -268,8 +268,6 @@
       downsampleHz: 7500,
       preEmphasis: 0.92,
       drive: 2.2,
-      clickMs: 2.5,
-      clickAmp: 0.32,
       useReverb: false,
       reverbDelayMs: 24,
       reverbDecay: 0.18,
@@ -423,16 +421,6 @@
       return out;
     }
 
-    function addClickTransientInPlace(input, clickMs=2.5, amp=0.3){
-      const n = Math.max(1, Math.floor(SR * (clickMs / 1000)));
-      for(let i=0;i<n && i<input.length;i++){
-        const env = Math.exp(-6 * (i / n));
-        const s = (i % 2 === 0 ? 1 : -1);
-        input[i] += amp * env * s;
-      }
-      return input;
-    }
-
     // assemble phrase from tokens (simple mapping)
     async function synthPhrase(text){
       // simple tokenizer: map letters to vowel/plosive approximations
@@ -485,9 +473,6 @@
         out.set(p, offset);
         offset += p.length;
       }
-
-      // add a tiny transient "click" up front for extra pop
-      addClickTransientInPlace(out, SPEAK.clickMs, SPEAK.clickAmp);
 
       // add comb reverb
       if(SPEAK.useReverb){
