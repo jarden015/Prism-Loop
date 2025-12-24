@@ -13,7 +13,7 @@
       --glass: rgba(255,255,255,0.04);
       --mono: #cbd5e1;
     }
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
+    html,body{min-height:100vh;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;}
     body{
       background:
         radial-gradient(600px 300px at 10% 10%, rgba(167,139,250,0.08), transparent 10%),
@@ -21,7 +21,7 @@
         var(--bg);
       color:var(--mono);
       display:flex;
-      align-items:center;
+      align-items:flex-start;
       justify-content:center;
       padding:32px;
       box-sizing:border-box;
