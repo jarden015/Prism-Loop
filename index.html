@@ -262,12 +262,12 @@
     // Tuning: push it toward a sharper, toy-like "Speak & Spell" bite.
     const SPEAK = {
       harmonicCount: 12,
-      formantQ: 14,
-      plosiveHighpassHz: 1600,
-      bitDepth: 5,
-      downsampleHz: 7500,
-      preEmphasis: 0.92,
-      drive: 2.2,
+      formantQ: 9,
+      plosiveHighpassHz: 1000,
+      bitDepth: 6,
+      downsampleHz: 8000,
+      preEmphasis: 0.85,
+      drive: 1.6,
       useReverb: false,
       reverbDelayMs: 24,
       reverbDecay: 0.18,
@@ -337,8 +337,8 @@
       // envelope on master
       const now = 0;
       master.gain.setValueAtTime(0.0, now);
-      master.gain.linearRampToValueAtTime(1.0, now + 0.006);
-      master.gain.setValueAtTime(1.0, now + dur - 0.03);
+      master.gain.linearRampToValueAtTime(1.0, now + 0.015);
+      master.gain.setValueAtTime(1.0, now + dur - 0.04);
       master.gain.linearRampToValueAtTime(0.0, now + dur);
 
       const rendered = await offline.startRendering();
@@ -351,7 +351,7 @@
       const offline = new OfflineAudioContext(1, len, SR);
       const noiseBuf = offline.createBuffer(1, len, SR);
       const data = noiseBuf.getChannelData(0);
-      for(let i=0;i<len;i++) data[i] = (Math.random()*2 - 1) * Math.exp(-6 * (i/len));
+      for(let i=0;i<len;i++) data[i] = (Math.random()*2 - 1) * Math.exp(-8 * (i/len)) * 0.6;
       const src = offline.createBufferSource();
       src.buffer = noiseBuf;
       const hp = offline.createBiquadFilter();
