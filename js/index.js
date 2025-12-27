@@ -45,25 +45,31 @@
   }
 
   function loadAndRender() {
-    let posts = api.loadPosts();
-    posts = api.prunePosts(posts);
-    api.sortNewestFirst(posts);
-    posts = seedIfEmpty(posts);
+    // Try loading from data/posts.json (Git-tracked file, works on GitHub Pages)
+    fetch('/data/posts.json', { cache: 'no-store' })
+      .then(res => res.ok ? res.json() : null)
+      .then(jsonPosts => {
+        let posts = Array.isArray(jsonPosts) ? jsonPosts : null;
+        
+        // Fall back to localStorage if file doesn't exist or is invalid
+        if (!posts) {
+          posts = api.loadPosts();
+        }
 
-    const before = (() => {
-      try {
-        return localStorage.getItem(api.POSTS_KEY);
-      } catch {
-        return null;
-      }
-    })();
-    const after = JSON.stringify(posts);
+        posts = api.prunePosts(posts);
+        api.sortNewestFirst(posts);
+        posts = seedIfEmpty(posts);
 
-    if (before !== after) {
-      api.savePosts(posts);
-    }
-
-    api.renderPostList(postList, posts);
+        api.renderPostList(postList, posts);
+      })
+      .catch(() => {
+        // Fall back to localStorage if fetch fails
+        let posts = api.loadPosts();
+        posts = api.prunePosts(posts);
+        api.sortNewestFirst(posts);
+        posts = seedIfEmpty(posts);
+        api.renderPostList(postList, posts);
+      });
   }
 
   loadAndRender();
