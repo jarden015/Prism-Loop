@@ -50,7 +50,7 @@
 
   function loadAndRender() {
     // Try loading from data/posts.json (Git-tracked file, works on GitHub Pages)
-    fetch('/data/posts.json', { cache: 'no-store' })
+    fetch('data/posts.json', { cache: 'no-store' })
       .then(res => res.ok ? res.json() : null)
       .then(jsonPosts => {
         let posts = Array.isArray(jsonPosts) ? jsonPosts : null;
