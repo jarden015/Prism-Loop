@@ -1,14 +1,19 @@
-[
-  {
-    "id": "79407e21-6063-4d90-9d64-20299cda582b",
-    "createdAt": 1767209684316,
-    "blocks": [
-      {
-        "type": "text",
-        "text": "Welcome! Site is under construction."
-      }
-    ],
-    "sticky": true,
-    "stickyPosition": 1
-  }
-]
+{
+  "settings": {
+    "maxAgeDays": 0
+  },
+  "posts": [
+    {
+      "id": "79407e21-6063-4d90-9d64-20299cda582b",
+      "createdAt": 1767209684316,
+      "blocks": [
+        {
+          "type": "text",
+          "text": "Welcome! Site is under construction."
+        }
+      ],
+      "sticky": true,
+      "stickyPosition": 1
+    }
+  ]
+}

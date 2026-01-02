@@ -18,6 +18,30 @@
   const postBox = postList.closest?.('.post-box') || postList;
   api.enableWheelScroll?.(postBox, postList);
 
+  function parsePostsFilePayload(data) {
+    // Legacy format: [posts...]
+    if (Array.isArray(data)) {
+      return { posts: data, settings: null };
+    }
+
+    // New format: { settings: { maxAgeDays }, posts: [...] }
+    if (data && typeof data === 'object') {
+      const posts = Array.isArray(data.posts) ? data.posts : [];
+      const settings = data.settings && typeof data.settings === 'object' ? data.settings : null;
+      return { posts, settings };
+    }
+
+    return null;
+  }
+
+  function parseMaxAgeDaysSetting(raw) {
+    const n = Number.parseInt(String(raw), 10);
+    if (!Number.isFinite(n)) return null;
+    if (n < 0) return 0;
+    if (n > 3650) return 3650;
+    return n;
+  }
+
   function seedIfEmpty(currentPosts) {
     if (currentPosts.length || !POSTS_CONFIG.length) return currentPosts;
 
@@ -53,27 +77,50 @@
     fetch('data/posts.json', { cache: 'no-store' })
       .then(res => res.ok ? res.json() : null)
       .then(jsonPosts => {
-        let posts = Array.isArray(jsonPosts) ? jsonPosts : null;
+        const payload = parsePostsFilePayload(jsonPosts);
+        let posts = payload ? payload.posts : null;
         
         // Fall back to localStorage if file doesn't exist or is invalid
         if (!posts) {
           posts = api.loadPosts();
         }
 
-        posts = api.prunePosts(posts);
-        api.sortNewestFirst(posts);
-        posts = seedIfEmpty(posts);
+        const fromFile = parseMaxAgeDaysSetting(payload?.settings?.maxAgeDays);
+        const maxAgeDays = fromFile ?? api.getMaxAgeDays(14);
+        if (fromFile != null) {
+          // Keep localStorage aligned so other local pages/tabs behave consistently.
+          api.setMaxAgeDays(fromFile);
+        }
 
-        api.renderPostList(postList, posts);
+        const visible = api.prunePosts(posts, maxAgeDays);
+        api.sortNewestFirst(visible);
+        const seeded = seedIfEmpty(visible);
+
+        api.renderPostList(postList, seeded);
       })
       .catch(() => {
         // Fall back to localStorage if fetch fails
         let posts = api.loadPosts();
-        posts = api.prunePosts(posts);
-        api.sortNewestFirst(posts);
-        posts = seedIfEmpty(posts);
-        api.renderPostList(postList, posts);
+
+        const maxAgeDays = api.getMaxAgeDays(14);
+        const visible = api.prunePosts(posts, maxAgeDays);
+        api.sortNewestFirst(visible);
+        const seeded = seedIfEmpty(visible);
+        api.renderPostList(postList, seeded);
       });
+  }
+
+  const FEED_SYNC_CHANNEL = 'sonicPrism.posts.sync.v1';
+  const feedSync = globalThis.BroadcastChannel ? new BroadcastChannel(FEED_SYNC_CHANNEL) : null;
+  try {
+    feedSync?.addEventListener('message', (e) => {
+      const msg = e?.data;
+      if (msg?.type === 'refresh') {
+        loadAndRender();
+      }
+    });
+  } catch {
+    // ignore
   }
 
   loadAndRender();

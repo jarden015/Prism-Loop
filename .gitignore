@@ -1,5 +1,5 @@
 # Local-only admin UI (do not commit)
-admin.local.html
+pages/admin.local.html
 css/admin.local.css
 js/admin.local.js
 
